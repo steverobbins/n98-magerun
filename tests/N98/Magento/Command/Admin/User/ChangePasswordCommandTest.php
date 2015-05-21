@@ -68,6 +68,84 @@ class ChangePasswordCommandTest extends TestCase
         $this->assertContains('Password successfully changed', $commandTester->getDisplay());
     }
 
+    public function testInvalidPasswordShort()
+    {
+        $this->setExpectedException(
+          'InvalidArgumentException', 'Password must be at least of 7 characters.'
+        );
+
+        $this->userModel
+            ->expects($this->once())
+            ->method('loadByUsername')
+            ->with('aydin')
+            ->will($this->returnValue($this->userModel));
+
+        $this->userModel
+            ->expects($this->at(1))
+            ->method('getId')
+            ->will($this->returnValue(2));
+
+        $this->userModel
+            ->expects($this->once())
+            ->method('validate');
+
+        $this->userModel
+            ->expects($this->once())
+            ->method('save');
+
+        $application = $this->getApplication();
+        $application->add($this->command);
+        $command = $this->getApplication()->find($this->commandName);
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            array(
+                'command'   => $command->getName(),
+                'username'  => 'aydin',
+                'password'  => 'Short1',
+            )
+        );
+    }
+
+    public function testInvalidPasswordCharacters()
+    {
+        $this->setExpectedException(
+          'InvalidArgumentException', 'Password must include both numeric and alphabetic characters.'
+        );
+
+        $this->userModel
+            ->expects($this->once())
+            ->method('loadByUsername')
+            ->with('aydin')
+            ->will($this->returnValue($this->userModel));
+
+        $this->userModel
+            ->expects($this->at(1))
+            ->method('getId')
+            ->will($this->returnValue(2));
+
+        $this->userModel
+            ->expects($this->once())
+            ->method('validate');
+
+        $this->userModel
+            ->expects($this->once())
+            ->method('save');
+
+        $application = $this->getApplication();
+        $application->add($this->command);
+        $command = $this->getApplication()->find($this->commandName);
+
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            array(
+                'command'   => $command->getName(),
+                'username'  => 'aydin',
+                'password'  => 'missingnumericcharaters',
+            )
+        );
+    }
+
     public function testReturnEarlyIfUserNotFound()
     {
         $this->userModel
